@@ -18,16 +18,18 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
+  const [password, setPassword] = useState("");
+
   const handleRegister = async (e: React.FormEvent) => {
     const supabase = createClient();
     e.preventDefault();
     setLoading(true);
     setMessage("");
 
-    const { error } = await supabase.auth.signInWithOtp({
+    const { data, error } = await supabase.auth.signUp({
       email,
+      password,
       options: {
-        emailRedirectTo: `${window.location.origin}/callback`,
         data: {
           full_name: fullName,
           company,
@@ -39,8 +41,22 @@ export default function RegisterPage() {
 
     if (error) {
       setMessage(error.message);
-    } else {
-      setMessage("Check your email for a confirmation link!");
+    } else if (data.user) {
+      // Create profile (trigger also creates it, but this ensures metadata is complete)
+      const { error: profileError } = await supabase.from("profiles").upsert({
+        id: data.user.id,
+        email: data.user.email!,
+        full_name: fullName,
+        company,
+        job_title: jobTitle,
+        industry_segment: industry,
+      });
+      if (profileError) {
+        console.error("Profile creation error:", profileError);
+        // The database trigger should have created the profile already,
+        // so this failing is not critical. Continue to dashboard.
+      }
+      window.location.href = "/dashboard";
     }
     setLoading(false);
   };
@@ -61,6 +77,10 @@ export default function RegisterPage() {
             <div className="space-y-2">
               <Label htmlFor="email">Work Email</Label>
               <Input id="email" type="email" placeholder="you@company.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input id="password" type="password" placeholder="Min 6 characters" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="company">Company</Label>

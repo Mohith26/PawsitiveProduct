@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
 import type { Profile } from "@/lib/types/database";
@@ -9,25 +9,31 @@ export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
-  const supabase = createClient();
+  const supabaseRef = useRef(createClient());
 
   useEffect(() => {
+    const supabase = supabaseRef.current;
+
     const getUser = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      setUser(user);
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        setUser(user);
 
-      if (user) {
-        const { data } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", user.id)
-          .single();
-        setProfile(data);
+        if (user) {
+          const { data } = await supabase
+            .from("profiles")
+            .select("*")
+            .eq("id", user.id)
+            .single();
+          setProfile(data);
+        }
+      } catch (err) {
+        console.error("useAuth: failed to get user", err);
+      } finally {
+        setLoading(false);
       }
-
-      setLoading(false);
     };
 
     getUser();
@@ -49,10 +55,10 @@ export function useAuth() {
     });
 
     return () => subscription.unsubscribe();
-  }, [supabase]);
+  }, []);
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    await supabaseRef.current.auth.signOut();
     setUser(null);
     setProfile(null);
   };

@@ -1,10 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import { ThreadCard } from "@/components/community/thread-card";
+import { CreateThreadDialog } from "@/components/community/create-thread-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
-import { Plus } from "lucide-react";
 import type { ForumThread } from "@/lib/types/forum";
 
 interface Props {
@@ -51,6 +51,7 @@ export default async function ThreadListPage({ params, searchParams }: Props) {
           <h1 className="text-3xl font-bold">{category.name}</h1>
           <p className="text-muted-foreground">{category.description}</p>
         </div>
+        <CreateThreadDialog categoryId={category.id} />
       </div>
 
       <div className="flex items-center gap-4">

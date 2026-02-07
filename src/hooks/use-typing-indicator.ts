@@ -6,10 +6,11 @@ import type { TypingIndicator } from "@/lib/types/chat";
 
 export function useTypingIndicator(channelId: string, userId: string, userName: string) {
   const [typingUsers, setTypingUsers] = useState<TypingIndicator[]>([]);
-  const supabase = createClient();
+  const supabaseRef = useRef(createClient());
   const timeoutRef = useRef<NodeJS.Timeout>(undefined);
 
   useEffect(() => {
+    const supabase = supabaseRef.current;
     const channel = supabase.channel(`typing:${channelId}`);
 
     channel
@@ -34,11 +35,12 @@ export function useTypingIndicator(channelId: string, userId: string, userName: 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [channelId, userId, supabase]);
+  }, [channelId, userId]);
 
   const sendTyping = useCallback(() => {
     if (timeoutRef.current) return; // Throttle
 
+    const supabase = supabaseRef.current;
     const channel = supabase.channel(`typing:${channelId}`);
     channel.send({
       type: "broadcast",
@@ -49,7 +51,7 @@ export function useTypingIndicator(channelId: string, userId: string, userName: 
     timeoutRef.current = setTimeout(() => {
       timeoutRef.current = undefined;
     }, 2000);
-  }, [channelId, userId, userName, supabase]);
+  }, [channelId, userId, userName]);
 
   return { typingUsers, sendTyping };
 }

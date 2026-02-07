@@ -3,7 +3,9 @@ import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Plus, Edit } from "lucide-react";
+import { Edit } from "lucide-react";
+import { CreateCourseDialog } from "@/components/admin/create-course-dialog";
+import type { CourseCategory } from "@/lib/types/courses";
 
 export default async function AdminCoursesPage() {
   const supabase = await createClient();
@@ -13,10 +15,16 @@ export default async function AdminCoursesPage() {
     .select("*, category:course_categories(*)")
     .order("created_at", { ascending: false });
 
+  const { data: categories } = await supabase
+    .from("course_categories")
+    .select("*")
+    .order("display_order", { ascending: true });
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Manage Courses</h1>
+        <CreateCourseDialog categories={(categories ?? []) as CourseCategory[]} />
       </div>
 
       <div className="space-y-4">

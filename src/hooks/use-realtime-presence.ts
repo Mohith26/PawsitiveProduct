@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 interface PresenceUser {
@@ -11,9 +11,10 @@ interface PresenceUser {
 
 export function useRealtimePresence(channelId: string, userId: string, userName: string) {
   const [onlineUsers, setOnlineUsers] = useState<PresenceUser[]>([]);
-  const supabase = createClient();
+  const supabaseRef = useRef(createClient());
 
   useEffect(() => {
+    const supabase = supabaseRef.current;
     const channel = supabase.channel(`presence:${channelId}`, {
       config: { presence: { key: userId } },
     });
@@ -43,7 +44,7 @@ export function useRealtimePresence(channelId: string, userId: string, userName:
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [channelId, userId, userName, supabase]);
+  }, [channelId, userId, userName]);
 
   return { onlineUsers };
 }

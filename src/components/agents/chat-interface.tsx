@@ -23,6 +23,7 @@ export function ChatInterface({ apiEndpoint, agentName, placeholder = "Type your
   });
 
   const [input, setInput] = useState("");
+  const [error, setError] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
   const isLoading = status === "streaming" || status === "submitted";
 
@@ -37,8 +38,21 @@ export function ChatInterface({ apiEndpoint, agentName, placeholder = "Type your
     if (!input.trim() || isLoading) return;
     const text = input.trim();
     setInput("");
-    await sendMessage({ text });
+    setError("");
+    try {
+      await sendMessage({ text });
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Failed to send message";
+      setError(errorMessage);
+    }
   };
+
+  // Check for API errors by making a preflight-style check
+  useEffect(() => {
+    if (status === "error") {
+      setError("Failed to get a response from the AI agent. Please check that ANTHROPIC_API_KEY is set in .env.local");
+    }
+  }, [status]);
 
   return (
     <div className="flex h-[calc(100vh-12rem)] flex-col rounded-lg border">
@@ -67,6 +81,11 @@ export function ChatInterface({ apiEndpoint, agentName, placeholder = "Type your
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Loader2 className="h-4 w-4 animate-spin" />
               {agentName} is thinking...
+            </div>
+          )}
+          {error && (
+            <div className="rounded-md border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">
+              {error}
             </div>
           )}
         </div>

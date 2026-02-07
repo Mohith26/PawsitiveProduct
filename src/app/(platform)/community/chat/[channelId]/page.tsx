@@ -1,6 +1,8 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useRealtimeMessages } from "@/hooks/use-realtime-messages";
 import { useTypingIndicator } from "@/hooks/use-typing-indicator";
@@ -13,6 +15,19 @@ export default function ChannelPage() {
   const params = useParams();
   const channelId = params.channelId as string;
   const { user, profile } = useAuth();
+  const [channelName, setChannelName] = useState("Channel");
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase
+      .from("chat_channels")
+      .select("name")
+      .eq("id", channelId)
+      .single()
+      .then(({ data }) => {
+        if (data) setChannelName(data.name);
+      });
+  }, [channelId]);
   const { messages, loading, sendMessage } = useRealtimeMessages(channelId);
   const { typingUsers, sendTyping } = useTypingIndicator(
     channelId,
@@ -37,7 +52,7 @@ export default function ChannelPage() {
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center justify-between border-b px-4 py-3">
-        <h2 className="font-semibold">Channel</h2>
+        <h2 className="font-semibold"># {channelName}</h2>
         <div className="flex items-center gap-2">
           <Badge variant="outline">{onlineUsers.length} online</Badge>
         </div>

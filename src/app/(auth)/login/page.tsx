@@ -12,28 +12,27 @@ import { Separator } from "@/components/ui/separator";
 
 function LoginForm() {
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirectTo") || "/dashboard";
 
-  const handleMagicLink = async (e: React.FormEvent) => {
+  const handlePasswordLogin = async (e: React.FormEvent) => {
     const supabase = createClient();
     e.preventDefault();
     setLoading(true);
     setMessage("");
 
-    const { error } = await supabase.auth.signInWithOtp({
+    const { error } = await supabase.auth.signInWithPassword({
       email,
-      options: {
-        emailRedirectTo: `${window.location.origin}/callback?redirectTo=${redirectTo}`,
-      },
+      password,
     });
 
     if (error) {
       setMessage(error.message);
     } else {
-      setMessage("Check your email for a magic link!");
+      window.location.href = redirectTo;
     }
     setLoading(false);
   };
@@ -73,7 +72,7 @@ function LoginForm() {
           </div>
         </div>
 
-        <form onSubmit={handleMagicLink} className="space-y-4">
+        <form onSubmit={handlePasswordLogin} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
@@ -85,8 +84,18 @@ function LoginForm() {
               required
             />
           </div>
+          <div className="space-y-2">
+            <Label htmlFor="password">Password</Label>
+            <Input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Sending..." : "Send Magic Link"}
+            {loading ? "Signing in..." : "Sign In"}
           </Button>
         </form>
 

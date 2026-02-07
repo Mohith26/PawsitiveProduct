@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { ChannelList } from "@/components/community/channel-list";
+import { CreateChannelDialog } from "@/components/community/create-channel-dialog";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import type { ChatChannel } from "@/lib/types/chat";
 
@@ -12,9 +13,12 @@ export default async function ChatPage() {
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Community Chat</h1>
-        <p className="text-muted-foreground">Real-time conversations with pet industry peers</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">Community Chat</h1>
+          <p className="text-muted-foreground">Real-time conversations with pet industry peers</p>
+        </div>
+        <CreateChannelDialog />
       </div>
 
       <Card>
