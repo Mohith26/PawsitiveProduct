@@ -71,7 +71,16 @@ export default async function AdminLayout({
           </Link>
         </nav>
       </aside>
-      <main className="flex-1 p-6">{children}</main>
+      <div className="flex-1 flex flex-col">
+        <div className="border-b bg-muted/40 px-6 py-3">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Link href="/dashboard" className="hover:text-foreground">Platform</Link>
+            <span>/</span>
+            <span className="text-foreground font-medium">Admin Panel</span>
+          </div>
+        </div>
+        <main className="flex-1 p-6">{children}</main>
+      </div>
     </div>
   );
 }

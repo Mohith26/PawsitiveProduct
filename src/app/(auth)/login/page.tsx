@@ -42,7 +42,7 @@ function LoginForm() {
     await supabase.auth.signInWithOAuth({
       provider,
       options: {
-        redirectTo: `${window.location.origin}/callback?redirectTo=${redirectTo}`,
+        redirectTo: `${window.location.origin}/auth/callback?redirectTo=${redirectTo}`,
       },
     });
   };

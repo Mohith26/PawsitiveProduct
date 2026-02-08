@@ -1,7 +1,9 @@
 "use client";
 
 import { useAuth } from "@/hooks/use-auth";
+import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -16,6 +18,9 @@ import { MobileNav } from "./mobile-nav";
 
 export function Topbar() {
   const { profile, signOut } = useAuth();
+  const pathname = usePathname();
+  const isAdminRoute = pathname?.startsWith('/admin');
+  const isVendorRoute = pathname?.startsWith('/vendor');
 
   const initials = profile?.full_name
     ? profile.full_name
@@ -30,6 +35,12 @@ export function Topbar() {
       <MobileNav />
       <div className="hidden lg:block" />
       <div className="flex items-center gap-4">
+        {isAdminRoute && (
+          <Badge variant="destructive">Admin Mode</Badge>
+        )}
+        {isVendorRoute && (
+          <Badge variant="secondary">Vendor Portal</Badge>
+        )}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-8 w-8 rounded-full">
